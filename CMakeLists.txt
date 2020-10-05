@@ -42,6 +42,12 @@ include(cmake/StaticAnalyzers.cmake)
 
 option(ENABLE_TESTING "Enable Test Builds" ON)
 
+target_include_directories(project_options
+    INTERFACE
+        include
+        ${OpenCV_INCLUDE_DIRS}
+)
+
 # add third-party headers
 target_include_directories(project_third_party
     INTERFACE
@@ -59,6 +65,7 @@ if(ENABLE_TESTING)
     # Catch2 has also CMake utilities, but they aren't used there.
     add_executable(asserv_tests
         test/catch_main.cpp
+        test/serial/parse_task_tests.cpp
     )
     target_link_libraries(asserv_tests
         PRIVATE
