@@ -46,7 +46,7 @@ SCENARIO("Tasks parsing", "[serial][order") {
         DummyDispatcher dummyDisp;
         
         WHEN("A WHO_AMI message is parsed") {
-            serial::parseTask("w;", dummyDisp);
+            REQUIRE(serial::parseTask("w;", dummyDisp));
             
             THEN("The dispatcher function doWhoAmi is called") {
                 REQUIRE(dummyDisp.getNumberOfCalls(DummyDispatcher::ActionType::WHOAMI) == 1);

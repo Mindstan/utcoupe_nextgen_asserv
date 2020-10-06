@@ -7,7 +7,7 @@
 
 namespace utcoupe::asserv::serial {
     template<TasksDispatcherLike TTasksDispatcher>
-    bool parseTask(std::string_view msg, TTasksDispatcher& tasksDispatcher);
+    [[nodiscard("Returns true if it fails!")]] bool parseTask(std::string_view msg, TTasksDispatcher& tasksDispatcher);
 } // namespace utcoupe::asserv::serial
 
 #include "utcoupe/asserv/serial/parse_task.hxx"
