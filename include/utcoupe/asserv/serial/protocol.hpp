@@ -3,6 +3,20 @@
 
 namespace utcoupe::asserv::serial {
     enum class TaskTypes {
+        CLEAN_GOALS = 'g',
+        GET_CODER = 'j',
+        GET_LAST_ID = 't',
+        GET_POS = 'n',
+        GET_POS_ID = 'o',
+        GET_SPD = 'y',
+        GET_TARGET_SPD = 'v',
+        HALT = 'H',
+        KILL_GOAL = 'f',
+        PAUSE = 'q',
+        RESET_ID = 's',
+        RESUME = 'r',
+        // SET_EMERGENCY_STOP = 'A',
+        START = 'S',
         WHO_AMI = 'w'
     };
 } // namespace utcoupe::asserv::serial

@@ -4,7 +4,20 @@
 namespace utcoupe::asserv {
     template <typename TTasksDispatcherImpl>
     concept TasksDispatcherLike = requires (TTasksDispatcherImpl tasksDispatcher) {
-        tasksDispatcher.doWhoAmi();
+        tasksDispatcher.cleanGoals();
+        tasksDispatcher.getCoder();
+        tasksDispatcher.getLastID();
+        tasksDispatcher.getPos();
+        tasksDispatcher.getPosID();
+        tasksDispatcher.getSpeed();
+        tasksDispatcher.getTargetSpeed();
+        tasksDispatcher.halt();
+        tasksDispatcher.killGoal();
+        tasksDispatcher.pause();
+        tasksDispatcher.resetID();
+        tasksDispatcher.resume();
+        tasksDispatcher.start();
+        tasksDispatcher.whoAmi();
     };
 } // namespace utcoupe::asserv
 
