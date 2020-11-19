@@ -13,7 +13,7 @@ using namespace utcoupe::asserv;
 class DummyDispatcher {
 public:
     DummyDispatcher() {
-        resetCallCounters();
+        resetAll();
     }
     
     enum class ActionType {
@@ -24,6 +24,7 @@ public:
         GET_POS_ID,
         GET_SPD,
         GET_TARGET_SPD,
+        GOTO_WITH_ANGLE,
         HALT,
         KILL_GOAL,
         PAUSE,
@@ -39,8 +40,17 @@ public:
         return m_callCounters.at(static_cast<std::size_t>(action));
     }
     
+    void resetAll() {
+        resetCallCounters();
+        resetSentinels();
+    }
+    
     constexpr void resetCallCounters() {
         m_callCounters.fill(0);
+    }
+    
+    void resetSentinels() {
+        gotoWithAngleSentinel = nullptr;
     }
     
     // Requirements of the concept
@@ -58,6 +68,14 @@ public:
     void getSpeed() { incrementCallCounter(ActionType::GET_SPD); }
     
     void getTargetSpeed() { incrementCallCounter(ActionType::GET_TARGET_SPD); }
+    
+    std::function<void(int, int, float, int)> gotoWithAngleSentinel;
+    void gotoWithAngle(int x, int y, float angle, int direction) {
+        incrementCallCounter(ActionType::GOTO_WITH_ANGLE);
+        if (gotoWithAngleSentinel) {
+            gotoWithAngleSentinel(x, y, angle, direction);
+        }
+    }
     
     void halt() { incrementCallCounter(ActionType::HALT); }
     
@@ -126,6 +144,20 @@ SCENARIO("Tasks parsing", "[serial][order") {
                     REQUIRE(dummyDisp.getNumberOfCalls(task.second) == 1);
                 }
             }
+        }
+        
+        WHEN("A task whith arguments is parsed") {
+            dummyDisp.resetAll();
+            
+            auto msg = "c;1000;1000;1.571;1;"sv;
+            
+            bool good = false;
+            auto gotoWithAngleSentinel = [&good](int x, int y, float angle, int direction) {
+                good = (x == 1000 && y == 1000 && angle == 1.571f && direction == 1);
+            };
+            dummyDisp.gotoWithAngleSentinel = gotoWithAngleSentinel;
+            REQUIRE(serial::parseTask(msg, dummyDisp));
+            REQUIRE(good);
         }
     }
 }

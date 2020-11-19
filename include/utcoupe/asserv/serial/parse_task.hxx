@@ -4,14 +4,22 @@
 #include "utcoupe/asserv/serial/protocol.hpp"
 
 #include <charconv>
+#include <concepts>
 #include <functional>
 #include <optional>
 #include <utility>
 
 namespace utcoupe::asserv::serial {
     
+    namespace impl {
+        template<typename T>
+        concept CanIntantiateFromChars = requires(T a, const char* first, const char* last) {
+            { std::from_chars(first, last, a) };
+        };
+    } // namespace impl
+    
     /**
-     * Parse a parameter given in a string, and returns the parsed value.
+     * Parse a number given in a string, and returns the parsed value.
      * 
      * Compatible types are all integer types, float, double, long double.
      * If it fails to parse, it will return std::nullopt.
@@ -21,7 +29,8 @@ namespace utcoupe::asserv::serial {
      * @return The parsed value
      */
     template<typename ArgT>
-    std::optional<ArgT> parseParameters(const char* first, const char* last) {
+    requires impl::CanIntantiateFromChars<ArgT>
+    std::optional<ArgT> parseParameters(const char* first, const char* last) noexcept {
         ArgT val;
         auto result = std::from_chars(first, last, val);
         if (result.ec != std::errc{}) {
@@ -31,7 +40,29 @@ namespace utcoupe::asserv::serial {
     }
     
     /**
-     * Parse parameters given in a string, and returns filled arguments in a tuple.
+     * Helper when std::from_chars for current type is not available.
+     * 
+     * @TODO handle floating values
+     * @TODO maybe assert error
+     */
+    template<typename ArgT>
+    std::optional<ArgT> parseParameters([[maybe_unused]] const char* first, [[maybe_unused]] const char* last) noexcept {
+        return std::nullopt;
+    }
+    
+    /**
+     * Helper when std::from_chars for current type is not available.
+     * 
+     * @TODO handle floating values
+     * @TODO maybe assert error
+     */
+    template<typename CurArgT, typename... OtherArgsT>
+    std::optional<std::tuple<CurArgT, OtherArgsT...>> parseParameters([[maybe_unused]] const char* first, [[maybe_unused]] const char* last) noexcept {
+        return std::nullopt;
+    }
+    
+    /**
+     * Parse numbers given in a string, and returns filled arguments in a tuple.
      * 
      * Compatible types are all integer types, float, double, long double.
      * Parameters must be separed by a character like ' ', ';', ..., that can't be interpreted as part of a number. See https://en.cppreference.com/w/cpp/utility/from_chars for more details
@@ -42,7 +73,8 @@ namespace utcoupe::asserv::serial {
      * @return A tuple containing values for all given argument types, in the same order, or std::nullopt if it has failed
      */
     template<typename CurArgT, typename... OtherArgsT>
-    std::optional<std::tuple<CurArgT, OtherArgsT...>> parseParameters(const char* first, const char* last) {
+    requires impl::CanIntantiateFromChars<CurArgT>
+    std::optional<std::tuple<CurArgT, OtherArgsT...>> parseParameters(const char* first, const char* last) noexcept {
         CurArgT val;
         auto [nextFirst, ec] = std::from_chars(first, last, val);
         if (ec != std::errc{} || nextFirst + 1 >= last) {
@@ -53,11 +85,37 @@ namespace utcoupe::asserv::serial {
         if (!otherValues) {
             return std::nullopt;
         }
-        return std::tuple_cat(val, otherValues);
+        return std::tuple_cat(std::tuple{ val }, otherValues.value());
+    }
+    
+    template<typename... ArgsT>
+    bool parseThenCall(std::string_view msgParams, std::function<void(ArgsT...)> callback) noexcept {
+        auto argumentValues = parseParameters<ArgsT...>(msgParams.data(), msgParams.data() + msgParams.size());
+        if (!argumentValues) {
+            return false;
+        }
+        std::apply(callback, argumentValues.value());
+        return true;
+    }
+    
+    template<class ObjectT, typename... ArgsT>
+    bool parseThenCall(std::string_view msgParams, ObjectT& obj, void(ObjectT::* callback)(ArgsT...)) noexcept {
+        auto argumentValues = parseParameters<ArgsT...>(msgParams.data(), msgParams.data() + msgParams.size());
+        if (!argumentValues) {
+            return false;
+        }
+        auto fun = std::mem_fn(callback);
+        std::apply(
+            [&](auto&&... args){ fun(obj, std::forward<decltype(args)>(args)...); },
+            argumentValues.value()
+        );
+        return true;
     }
     
     template<TasksDispatcherLike TTasksDispatcher>
     bool parseTask(std::string_view msg, TTasksDispatcher& tasksDispatcher) {
+        using namespace std::placeholders;
+        
         switch(static_cast<TaskTypes>(msg.at(0))) {
         case TaskTypes::CLEAN_GOALS:
             tasksDispatcher.cleanGoals();
@@ -86,6 +144,16 @@ namespace utcoupe::asserv::serial {
         case TaskTypes::GET_TARGET_SPD:
             tasksDispatcher.getTargetSpeed();
             break;
+            
+        case TaskTypes::GOTO_WITH_ANGLE:
+            if (msg.size() > 2) {
+                return parseThenCall(
+                    msg.substr(2, msg.size() - 2),
+                    tasksDispatcher,
+                    &TTasksDispatcher::gotoWithAngle
+                );
+            }
+            return false;
         
         case TaskTypes::HALT:
             tasksDispatcher.halt();

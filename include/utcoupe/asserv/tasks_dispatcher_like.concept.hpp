@@ -11,6 +11,7 @@ namespace utcoupe::asserv {
         tasksDispatcher.getPosID();
         tasksDispatcher.getSpeed();
         tasksDispatcher.getTargetSpeed();
+        { tasksDispatcher.gotoWithAngle(int{} /* x */, int{} /* y */, float{} /* angle */, int{} /* direction */) };
         tasksDispatcher.halt();
         tasksDispatcher.killGoal();
         tasksDispatcher.pause();

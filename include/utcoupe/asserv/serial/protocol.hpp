@@ -10,6 +10,7 @@ namespace utcoupe::asserv::serial {
         GET_POS_ID = 'o',
         GET_SPD = 'y',
         GET_TARGET_SPD = 'v',
+        GOTO_WITH_ANGLE = 'c',
         HALT = 'H',
         KILL_GOAL = 'f',
         PAUSE = 'q',
