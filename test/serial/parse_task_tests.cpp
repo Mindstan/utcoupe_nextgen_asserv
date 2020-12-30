@@ -101,7 +101,7 @@ public:
         }
 };
 
-SCENARIO("Tasks parsing", "[serial][order") {
+SCENARIO("Tasks parsing", "[serial][order]") {
     using namespace std::string_view_literals;
     GIVEN("A dummy implementation of task dispatcher") {
         DummyDispatcher dummyDisp;
