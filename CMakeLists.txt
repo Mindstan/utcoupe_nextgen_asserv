@@ -62,15 +62,33 @@ install(TARGETS utcoupe_nextgen_asserv RUNTIME DESTINATION bin)
 if(ENABLE_TESTING)
     enable_testing()
     message("Building Tests.")
+    
+    # Disable warnings as errors since [boost::ext]::ut emits warnings
+    set(WARNINGS_AS_ERRORS OFF)
+    add_library(project_tests_warnings INTERFACE)
+    set_project_warnings(project_tests_warnings)
+    
+    
     # Catch2 has also CMake utilities, but they aren't used there.
-    add_executable(asserv_tests
+    add_executable(asserv_tests_catch
         test/catch_main.cpp
         test/serial/parse_task_tests.cpp
+    )
+    target_link_libraries(asserv_tests_catch
+        PRIVATE
+            project_options
+            project_tests_warnings
+            project_third_party
+    )
+    
+    add_executable(asserv_tests
+        test/ut_main.cpp
+        test/serial/order_tests.cpp
     )
     target_link_libraries(asserv_tests
         PRIVATE
             project_options
-            project_warnings
+            project_tests_warnings
             project_third_party
     )
 endif()
