@@ -72,7 +72,7 @@ if(ENABLE_TESTING)
     # Catch2 has also CMake utilities, but they aren't used there.
     add_executable(asserv_tests_catch
         test/catch_main.cpp
-        test/serial/parse_task_tests.cpp
+        test/serial/parse_task_tests_catch.cpp
     )
     target_link_libraries(asserv_tests_catch
         PRIVATE
@@ -84,6 +84,7 @@ if(ENABLE_TESTING)
     add_executable(asserv_tests
         test/ut_main.cpp
         test/serial/order_tests.cpp
+        test/serial/order_parser_tests.cpp
     )
     target_link_libraries(asserv_tests
         PRIVATE
