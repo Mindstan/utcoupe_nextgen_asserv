@@ -2,6 +2,7 @@
 #define UTCOUPE_ASSERV_SERIAL_PARSE_TASK_HXX
 
 #include "utcoupe/asserv/serial/protocol.hpp"
+#include "utcoupe/asserv/serial/traits.hpp"
 
 #include <charconv>
 #include <concepts>
@@ -10,13 +11,6 @@
 #include <utility>
 
 namespace utcoupe::asserv::serial {
-    
-    namespace impl {
-        template<typename T>
-        concept CanIntantiateFromChars = requires(T a, const char* first, const char* last) {
-            { std::from_chars(first, last, a) };
-        };
-    } // namespace impl
     
     /**
      * Parse a number given in a string, and returns the parsed value.
@@ -29,7 +23,7 @@ namespace utcoupe::asserv::serial {
      * @return The parsed value
      */
     template<typename ArgT>
-    requires impl::CanIntantiateFromChars<ArgT>
+    requires CanIntantiateFromChars<ArgT>
     std::optional<ArgT> parseParameters(const char* first, const char* last) noexcept {
         ArgT val;
         auto result = std::from_chars(first, last, val);
@@ -73,7 +67,7 @@ namespace utcoupe::asserv::serial {
      * @return A tuple containing values for all given argument types, in the same order, or std::nullopt if it has failed
      */
     template<typename CurArgT, typename... OtherArgsT>
-    requires impl::CanIntantiateFromChars<CurArgT>
+    requires CanIntantiateFromChars<CurArgT>
     std::optional<std::tuple<CurArgT, OtherArgsT...>> parseParameters(const char* first, const char* last) noexcept {
         CurArgT val;
         auto [nextFirst, ec] = std::from_chars(first, last, val);

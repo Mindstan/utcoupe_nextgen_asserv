@@ -38,8 +38,8 @@ suite orderParser = [] {
                 std::string_view orderStr2 = "c;";
                 
                 then ("It should be executable")  = [&] {
-                    expect (parser.parseAndRunOrder(allOrders, orderStr1).has_value());
-                    expect (parser.parseAndRunOrder(allOrders, orderStr2).has_value());
+                    expect (parser.parseAndRunOrder(allOrders, orderStr2).has_value()) << "Order without arguments.";
+                    expect (parser.parseAndRunOrder(allOrders, orderStr1).has_value()) << "Order with argument.";
                 };
             };
             
