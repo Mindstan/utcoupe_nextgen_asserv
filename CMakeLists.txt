@@ -68,19 +68,6 @@ if(ENABLE_TESTING)
     add_library(project_tests_warnings INTERFACE)
     set_project_warnings(project_tests_warnings)
     
-    
-    # Catch2 has also CMake utilities, but they aren't used there.
-    add_executable(asserv_tests_catch
-        test/catch_main.cpp
-        test/serial/parse_task_tests_catch.cpp
-    )
-    target_link_libraries(asserv_tests_catch
-        PRIVATE
-            project_options
-            project_tests_warnings
-            project_third_party
-    )
-    
     add_executable(asserv_tests
         test/ut_main.cpp
         test/serial/order_tests.cpp
