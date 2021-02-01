@@ -1,12 +1,13 @@
 #ifndef UTCOUPE_ASSERV_SERIAL_ORDER_HPP
 #define UTCOUPE_ASSERV_SERIAL_ORDER_HPP
 
+#include "utcoupe/asserv/serial/traits.hpp"
+
 #include <concepts>
 #include <functional>
 
 namespace utcoupe::asserv::serial {    
-    template<class CallbackT, typename... CallbackArgsT>
-    // TODO requires deserializable(CallbackArgsT)...
+    template<class CallbackT, Deserializable... CallbackArgsT>
     struct Order {
         using CallbackArgs = std::tuple<CallbackArgsT...>;
         
@@ -23,7 +24,7 @@ namespace utcoupe::asserv::serial {
     constexpr auto executeOrder(Executor& executor, OrderT& order, typename OrderT::CallbackArgs&& values) noexcept {
         return std::apply(
             [&executor, &order](auto&&... argValues){
-                return std::invoke(order.callback, executor, argValues...);
+                return std::invoke(order.callback, executor, std::forward<decltype(argValues)>(argValues)...);
             },
             values
         );
