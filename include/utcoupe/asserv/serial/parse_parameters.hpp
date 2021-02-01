@@ -45,8 +45,10 @@ namespace utcoupe::asserv::serial {
     /**
      * Helper when std::from_chars for current type is not available.
      * 
-     * @TODO handle floating values
-     * @TODO maybe assert error
+     * @TODO maybe assert error at compile time
+     * 
+     * @param first A pointer to the first char of the string
+     * @param last A pointer to the last char of the string
      */
     template<typename CurArgT, typename... OtherArgsT>
     std::optional<std::tuple<CurArgT, OtherArgsT...>> parseParameters([[maybe_unused]] const char* first, [[maybe_unused]] const char* last) noexcept {
@@ -55,6 +57,11 @@ namespace utcoupe::asserv::serial {
     
     /**
      * Helper when std::from_chars for floating-point types is not available.
+     * 
+     * @TODO 
+     * 
+     * @param first A pointer to the first char of the string
+     * @param last A pointer to the last char of the string
      */
     template<std::floating_point CurArgT, typename... OtherArgsT>
     requires (not CanIntantiateFromChars<CurArgT>)
