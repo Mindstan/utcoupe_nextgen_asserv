@@ -5,7 +5,9 @@
 
 #include <cmath>
 #include <string_view>
+#include <vector>
 
+using namespace std::string_view_literals;
 using namespace boost::ut;
 using namespace boost::ut::bdd;
 using namespace utcoupe::asserv;
@@ -16,6 +18,7 @@ struct Tester {
     constexpr int run1(int x) { return x; }
     constexpr int run2(float x) { return static_cast<int>(std::floor(x)); }
     constexpr int run3(int x, int y) { return x + y; }
+    constexpr int run4(float x, float y) { return static_cast<int>(x + y); }
     constexpr int compute1() { return 42; }
     constexpr int compute2() { return 43; }
 };
@@ -26,12 +29,12 @@ suite orderParser = [] {
         Tester tester;
         serial::OrderParser parser{tester};
         
-        scenario("Order exists") = [&] {
+        scenario("Order existence") = [&] {
             auto allOrders = std::tuple{
                 serial::createOrder('a', &Tester::run1),
                 serial::createOrder('b', &Tester::run2),
                 serial::createOrder('c', &Tester::compute1),
-                serial::createOrder('d', &Tester::compute2)
+                serial::createOrder('d', &Tester::compute2),
             };
         
             given ("An existing order correctly formed") = [&] {
@@ -58,12 +61,12 @@ suite orderParser = [] {
                 serial::createOrder('a', &Tester::run1),
                 serial::createOrder('b', &Tester::run2),
                 serial::createOrder('c', &Tester::run3),
+                serial::createOrder('d', &Tester::run4),
             };
             
             given ("An order with one argument correctly formed") = [&] {
                 std::string_view orderStr1 = "a;5;";
                 std::string_view orderStr2 = "b;4.3;";
-                std::string_view orderStr3 = "c;4;3;";
                 
                 then ("Arguments should be correctly parsed") = [&] {
                     auto result1 = parser.parseAndRunOrder(allOrders, orderStr1);
@@ -71,10 +74,32 @@ suite orderParser = [] {
                     
                     auto result2 = parser.parseAndRunOrder(allOrders, orderStr2);
                     expect(*result2 == 4_i);
-                    
-                    auto result3 = parser.parseAndRunOrder(allOrders, orderStr3);
-                    expect(*result3 == 7_i);
                 };
+            };
+            
+            given ("An order with multiple arguments correctly formed") = [&] {
+                std::vector<std::pair<std::string_view, int>> ordersStrResults {
+                    { "c;4;3;"sv, 7},
+                    { "d;1.4;0.8;"sv, 2 },
+                };
+                
+                then ("Arguments should be correctly parsed") = [&] (auto orderStrResult) {
+                    auto result = parser.parseAndRunOrder(allOrders, orderStrResult.first);
+                    expect(*result == orderStrResult.second);
+                } | ordersStrResults;
+            };
+            
+            given ("An order with missing arguments") = [&] {
+                auto ordersStr = std::array{
+                    "c;4;"sv,
+                    "d;3.4;"sv,
+                    "d;"sv,
+                };
+                
+                then ("It cannot be parsed") = [&] (std::string_view orderStr) {
+                    auto result = parser.parseAndRunOrder(allOrders, orderStr);
+                    expect(!result);
+                } | ordersStr;
             };
         };
     };
