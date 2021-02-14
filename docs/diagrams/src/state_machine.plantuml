@@ -1,0 +1,30 @@
+@startuml
+
+State Started {
+    State Sleeping
+    State InitializingLogic
+    State Running
+
+    [*] --> Sleeping
+    Sleeping --> InitializingLogic : Start
+    InitializingLogic --> Running
+    Running --> Sleeping : Stop
+
+    ||
+
+    [*] --> WaitingSerialIn
+    WaitingSerialIn --> ParseOrder : On message
+    ParseOrder --> WaitingSerialIn
+
+    ||
+
+    [*] --> EmergencyStopInactive
+    EmergencyStopInactive --> EmergencyStopActive : Activate ES
+    EmergencyStopActive --> EmergencyStopInactive : Deactivate ES
+}
+
+[*] --> InitInterfaces
+InitInterfaces --> Started
+Started --> FatalError
+
+@enduml
