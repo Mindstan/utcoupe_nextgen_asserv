@@ -1,0 +1,40 @@
+@startuml Run Substates
+
+State Run {
+
+    [*] --> Idleing
+    Idleing --> RunNextGoal : Goal available
+    RunNextGoal --> Idleing : No goals available
+
+    RunNextGoal --> Halt
+    Halt --> [*]
+
+    RunNextGoal --> Goto
+    Goto --> RunNextGoal
+
+    State GotoWithAngle {
+        [*] --> GotoXY
+        GotoXY --> GotoAngle
+        GotoAngle --> [*]
+    }
+
+    RunNextGoal --> GotoWithAngle
+    GotoWithAngle --> RunNextGoal
+
+    RunNextGoal --> Rot
+    Rot --> RunNextGoal
+
+    RunNextGoal --> Spd
+    Spd --> RunNextGoal
+
+    RunNextGoal --> PWM
+    PWM --> RunNextGoal
+
+    ||
+
+    Running --> Pause
+    Pause --> Running : Resume
+    [*] --> Running
+}
+
+@enduml
