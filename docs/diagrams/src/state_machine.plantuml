@@ -1,4 +1,4 @@
-@startuml
+@startuml Main State Machine
 
 State Started {
     State Sleeping
