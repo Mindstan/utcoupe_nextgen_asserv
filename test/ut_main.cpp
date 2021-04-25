@@ -4,7 +4,7 @@ int main () {
 
     using namespace boost::ut;
         
-    cfg<override> = {.tag = { "serial" }}; // CppCheck false positive, value is indeed used!
+    cfg<override> = {.tag = { "serial", "state-machine", "utilities"} }; // CppCheck false positive, value is indeed used!
     
     return 0;
 }

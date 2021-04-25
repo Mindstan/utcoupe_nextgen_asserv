@@ -21,6 +21,11 @@ suite staticQueue = [] {
                     expect(sq.empty());
                 };
                 
+                then ("We cannot obtain elements from front or back") = [&] {
+                    expect(sq.front() == nullptr);
+                    expect(sq.back() == nullptr);
+                };
+                
                 when ("We add an element by copy") = [&] {
                     
                     sq.push(VALUE1);
@@ -55,6 +60,56 @@ suite staticQueue = [] {
                         expect(sq.size() == 0_u);
                         expect(sq.empty());
                     };
+                };
+            };
+        };
+    };
+    
+    tag("utilities") / tag("static-queue") /
+    scenario("Simple use with multiple element") = [] {
+        given("An empty int queue") = [] {
+            const std::array VALUES {1, 1, 2, 3, 5, 8};
+            
+            const std::size_t QUEUE_CAPACITY = 10;
+            utilities::StaticQueue<int, QUEUE_CAPACITY> sq{};
+            
+            then ("It is empty") = [&] {
+                expect(sq.size() == 0_u);
+                expect(sq.empty());
+            };
+            
+            when("Values are pushed one-by-one") = [&] {
+                for (std::size_t idx = 0; idx < VALUES.size(); idx++) {
+                    expect(sq.push(VALUES[idx])) << "A value can be added";
+                    expect(that % sq.size() == idx + 1) << "The size has been updated";
+                    expect(that % sq.front() != nullptr);
+                    expect(that % *sq.front() == VALUES[0]) << "Front is always the first element";
+                    expect(that % sq.back() != nullptr);
+                    expect(that % *sq.back() == VALUES[idx]) << "Back is always the last element";
+                }
+            };
+            
+            when ("Values are poped one-by-one") = [&] {
+                for (std::size_t idx = 0; idx + 1 < VALUES.size(); idx++) {
+                    auto res = sq.pop();
+                    
+                    expect(res.has_value()) << "A value can be poped";
+                    expect(that % *res == VALUES[idx]) << "The correct value has been poped";
+                    expect(that % sq.size() == VALUES.size() - (idx + 1)) << "The size has been updated";
+                    expect(that % sq.front() != nullptr);
+                    expect(that % *sq.front() == VALUES[idx+1]) << "Front is always the first element";
+                    expect(that % sq.back() != nullptr);
+                    expect(that % *sq.back() == VALUES[VALUES.size() - 1]) << "Back is always the last element";
+                }
+                
+                auto res = sq.pop();
+                
+                expect(res.has_value()) << "A value can be poped";
+                expect(that % *res == VALUES[VALUES.size() - 1]) << "The correct value has been poped";
+                
+                
+                then ("The queue is now empty") = [&] {
+                    expect(sq.empty());
                 };
             };
         };
