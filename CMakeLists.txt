@@ -72,6 +72,7 @@ if(ENABLE_TESTING)
         test/ut_main.cpp
         test/serial/order_tests.cpp
         test/serial/order_parser_tests.cpp
+        test/utilities/static_queue_tests.cpp
     )
     target_link_libraries(asserv_tests
         PRIVATE
