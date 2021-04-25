@@ -22,8 +22,8 @@ suite staticQueue = [] {
                 };
                 
                 then ("We cannot obtain elements from front or back") = [&] {
-                    expect(sq.front() == nullptr);
-                    expect(sq.back() == nullptr);
+                    expect(sq.front() == std::nullopt);
+                    expect(sq.back() == std::nullopt);
                 };
                 
                 when ("We add an element by copy") = [&] {
@@ -36,14 +36,14 @@ suite staticQueue = [] {
                     };
                     
                     then ("We can access it through front()") = [&]  {
-                        auto* res = sq.front();
-                        expect(that % res != nullptr) << "It should not be null";
+                        auto res = sq.front();
+                        expect(res != std::nullopt) << "It should not be null";
                         expect(that % *res == VALUE1) << "It should have the correct value";
                     };
                     
                     then ("We can access it through back()") = [&]  {
-                        auto* res = sq.back();
-                        expect(that % res != nullptr) << "It should not be null";
+                        auto res = sq.back();
+                        expect(res != std::nullopt) << "It should not be null";
                         expect(that % *res == VALUE1) << "It should have the correct value";
                     };
                 };
@@ -82,9 +82,9 @@ suite staticQueue = [] {
                 for (std::size_t idx = 0; idx < VALUES.size(); idx++) {
                     expect(sq.push(VALUES[idx])) << "A value can be added";
                     expect(that % sq.size() == idx + 1) << "The size has been updated";
-                    expect(that % sq.front() != nullptr);
+                    expect(sq.front() != std::nullopt);
                     expect(that % *sq.front() == VALUES[0]) << "Front is always the first element";
-                    expect(that % sq.back() != nullptr);
+                    expect(sq.back() != std::nullopt);
                     expect(that % *sq.back() == VALUES[idx]) << "Back is always the last element";
                 }
             };
@@ -96,9 +96,9 @@ suite staticQueue = [] {
                     expect(res.has_value()) << "A value can be poped";
                     expect(that % *res == VALUES[idx]) << "The correct value has been poped";
                     expect(that % sq.size() == VALUES.size() - (idx + 1)) << "The size has been updated";
-                    expect(that % sq.front() != nullptr);
+                    expect(sq.front() != std::nullopt);
                     expect(that % *sq.front() == VALUES[idx+1]) << "Front is always the first element";
-                    expect(that % sq.back() != nullptr);
+                    expect(sq.back() != std::nullopt);
                     expect(that % *sq.back() == VALUES[VALUES.size() - 1]) << "Back is always the last element";
                 }
                 

@@ -2,6 +2,7 @@
 #define UTCOUPE_ASSERV_UTILITIES_STATIC_QUEUE_HPP
 
 #include <array>
+#include <functional>
 #include <optional>
 
 namespace utcoupe::asserv::utilities {
@@ -10,12 +11,12 @@ namespace utcoupe::asserv::utilities {
     public:
         constexpr StaticQueue() noexcept = default;
         
-        constexpr ElementT* back() noexcept {
-            if (size() == 0) {
-                return nullptr;
+        constexpr std::optional<std::reference_wrapper<ElementT>> back() noexcept {
+            if (empty()) {
+                return std::nullopt;
             }
             auto index = (m_end + Capacity - 1) % Capacity;
-            return &m_array[index];
+            return m_array[index];
         }
         
         constexpr std::size_t capacity() const noexcept {
@@ -26,11 +27,11 @@ namespace utcoupe::asserv::utilities {
             return size() == 0;
         }
         
-        constexpr ElementT* front() noexcept {
+        constexpr std::optional<std::reference_wrapper<ElementT>> front() noexcept {
             if (empty()) {
-                return nullptr;
+                return std::nullopt;
             }
-            return &m_array[m_begin];
+            return m_array[m_begin];
         }
         
         constexpr std::optional<ElementT> pop() noexcept {
