@@ -24,7 +24,7 @@ namespace utcoupe::asserv::utilities {
         }
         
         constexpr bool empty() const noexcept {
-            return size() == 0;
+            return m_empty;
         }
         
         constexpr std::optional<std::reference_wrapper<ElementT>> front() noexcept {
@@ -40,6 +40,9 @@ namespace utcoupe::asserv::utilities {
             }
             auto oldIndex = m_begin;
             m_begin = (m_begin + 1) % Capacity;
+            if (m_begin == m_end) {
+                m_empty = true;
+            }
             return std::move(m_array.at(oldIndex));
         }
         
@@ -48,19 +51,24 @@ namespace utcoupe::asserv::utilities {
         }
         
         constexpr bool push(ElementT&& elem) noexcept {
-            if (size() + 1 == Capacity) {
+            if (size() == Capacity) {
                 return false;
             }
+            m_empty = false;
             m_array.at(m_end) = std::move(elem);
             m_end = (m_end + 1) % Capacity;
             return true;
         }
         
         constexpr std::size_t size() const noexcept {
+            if (!m_empty && m_end == m_begin) {
+                return Capacity;
+            }
             return (m_end + Capacity - m_begin) % Capacity;
         }
         
     private:
+        bool m_empty {true};
         std::size_t m_begin {0};
         std::size_t m_end {0};
         std::array<ElementT, Capacity> m_array;

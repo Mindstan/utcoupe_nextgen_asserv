@@ -112,6 +112,31 @@ suite staticQueue = [] {
                     expect(sq.empty());
                 };
             };
+            
+            when ("The queue is full") = [&] {
+                for (int i = 1; i <= static_cast<int>(sq.capacity()); i++) {
+                    expect(sq.push(i));
+                }
+                
+                expect(that % sq.size() == sq.capacity()) << "Its size is its capacity";
+                expect(*sq.front() == 1_i);
+                expect(that % *sq.back() == static_cast<int>(sq.capacity()));
+                
+                then ("We cannot add more elements") = [&] {
+                    expect(!sq.push(0));
+                    expect(*sq.front() == 1_i);
+                    expect(that % *sq.back() == static_cast<int>(sq.capacity()));
+                };
+                
+                then ("We can add an element after poping another") = [&] {
+                    expect(sq.pop().has_value());
+                    expect(*sq.front() == 2_i);
+                    expect(sq.push(0));
+                    expect(*sq.front() == 2_i);
+                    expect(sq.back().has_value());
+                    expect(*sq.back() == 0_i);
+                };
+            };
         };
     };
 };
